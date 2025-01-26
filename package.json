@@ -1,0 +1,21 @@
+{
+  "name": "code-alpha-retaurant-management",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "start": "node ./bin/www"
+  },
+  "dependencies": {
+    "cookie-parser": "~1.4.4",
+    "debug": "~2.6.9",
+    "ejs": "^3.1.10",
+    "express": "^4.21.2",
+    "fs": "^0.0.1-security",
+    "http-errors": "~1.6.3",
+    "morgan": "~1.9.1",
+    "pdfkit": "^0.16.0",
+    "sequelize": "^6.37.5",
+    "shortid": "^2.2.17",
+    "sqlite3": "^5.1.7"
+  }
+}

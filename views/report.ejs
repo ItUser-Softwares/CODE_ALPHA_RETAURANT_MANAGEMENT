@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sales Report</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <style>
+        /* Your styles remain the same */
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <form id="reportForm" method="post">
+            <h1 class="text-center mb-4">Generate Sales Report</h1>
+
+            <div class="form-group">
+                <label for="startDate">Start Date</label>
+                <input type="date" class="form-control" id="startDate" required>
+            </div>
+            <div class="form-group">
+                <label for="endDate">End Date</label>
+                <input type="date" class="form-control" id="endDate" required>
+                <small id="dateError" class="text-danger" style="display:none;">End Date must be greater than or equal
+                    to
+                    Start Date.</small>
+            </div>
+
+            <div class="d-flex justify-content-between mt-4">
+                <button class="btn btn-primary" type="submit">Generate Report</button>
+            </div>
+
+        </form>
+
+    </div>
+
+
+    <script>
+        document.getElementById("reportForm").addEventListener("submit", (event) => {
+            event.preventDefault();
+
+            const startDate = document.getElementById("startDate").value;
+            const endDate = document.getElementById("endDate").value;
+
+            // Check if the dates are valid
+            const startDateObj = new Date(startDate);
+            const endDateObj = new Date(endDate);
+
+            if (!startDate || !endDate || startDateObj > endDateObj) {
+                alert("Please select a valid date range.");
+                return;
+            }
+
+            // Proceed with the request if the dates are valid
+            console.log(`Start Date: ${startDate}, End Date: ${endDate}`);
+
+            // Submit the form data to the server
+            fetch('/report', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ startDate, endDate }),
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Failed to generate PDF');
+                    }
+                    return response.blob(); // The response will be a PDF file
+                })
+                .then(blob => {
+                    const link = document.createElement('a');
+                    link.href = URL.createObjectURL(blob);
+                    link.download = 'sales_report.pdf';
+                    link.click();
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('There was an error generating the report.');
+                });
+        });
+
+    </script>
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+        crossorigin="anonymous"></script>
+</body>
+
+</html>

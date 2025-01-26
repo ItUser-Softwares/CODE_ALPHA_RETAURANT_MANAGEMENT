@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Table Reservations</title>
+
+    <!-- Link to Bootstrap CSS (CDN) -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+</head>
+
+<body>
+
+    <div class="container">
+        <h1 class="text-center mb-4">Table Reservations</h1>
+
+        <div class="table-container">
+            <div class="d-flex justify-content-between mb-3">
+                <form action="/reservation/new" method="post">
+                    <button type="submit" class="btn btn-success">Add New Table</button>
+                </form>
+            </div>
+            <table class="table table-bordered table-striped">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Reserved</th>
+                        <th>Date</th>
+                        <th>Customer Name</th>
+                        <th>Contact</th>
+                        <th>No. of Guests</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% tables.forEach(element=> { %>
+                        <tr>
+                            <td>
+                                <%= element.tableNumber %>
+                            </td>
+                            <% if (element.isReserved) { %>
+                                <td><span class="badge bg-success">Yes</span></td>
+                                <td>
+                                    <%= element.reservationDate %>
+                                </td>
+                                <td>
+                                    <%= element.customerName %>
+                                </td>
+                                <td>
+                                    <%= element.contactNumber %>
+                                </td>
+                                <td>
+                                    <%= element.numberOfGuests %>
+                                </td>
+                                <td>
+                                    <form action="/reservation/cancel/<%=element.tableNumber%>" method="post"><button
+                                            class="btn btn-danger">Done/Cancel</button></form>
+                                </td>
+                                <% } else { %>
+                                    <td><span class="badge bg-danger">No</span></td>
+                                    <td>-</td>
+                                    <td>-</td>
+                                    <td>-</td>
+                                    <td>-</td>
+                                    <td>
+                                        <button type="button" class="btn btn-primary" data-bs-toggle="modal"
+                                            data-bs-target="#reservationModal<%= element.id %>"
+                                            data-id="<%= element.id %>">
+                                            Add Reservation
+                                        </button>
+                                    </td>
+                                    <% } %>
+                        </tr>
+
+                        <!-- Modal for Reservation -->
+                        <div class="modal fade" id="reservationModal<%= element.id %>" tabindex="-1"
+                            aria-labelledby="reservationModalLabel<%= element.id %>" aria-hidden="true">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="reservationModalLabel<%= element.id %>">New
+                                            Reservation</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                            aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <form id="reservationForm<%= element.id %>">
+                                            <div class="form-group mb-3">
+                                                <label for="customerName<%= element.id %>">Customer Name</label>
+                                                <input type="text" class="form-control"
+                                                    id="customerName<%= element.id %>" required>
+                                            </div>
+
+                                            <div class="form-group mb-3">
+                                                <label for="contactNumber<%= element.id %>">Contact Number</label>
+                                                <input type="text" class="form-control"
+                                                    id="contactNumber<%= element.id %>" required>
+                                            </div>
+
+                                            <div class="form-group mb-3">
+                                                <label for="numberOfGuests<%= element.id %>">Number of Guests</label>
+                                                <input type="number" class="form-control"
+                                                    id="numberOfGuests<%= element.id %>" required>
+                                            </div>
+
+                                            <div class="form-group mb-3">
+                                                <label for="reservationDate<%= element.id %>">Reservation Date</label>
+                                                <input type="datetime-local" class="form-control"
+                                                    id="reservationDate<%= element.id %>" required>
+                                            </div>
+
+                                            <div class="form-group mb-3">
+                                                <label for="tableNumber<%= element.id %>">Table Number</label>
+                                                <input type="number" class="form-control"
+                                                    id="tableNumber<%= element.id %>" value="<%= element.tableNumber %>"
+                                                    disabled>
+                                            </div>
+
+
+                                        </form>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary"
+                                            onclick="document.location = '/reservation'"
+                                            data-bs-dismiss="modal">Close</button>
+                                        <button type="button" class="btn btn-primary"
+                                            id="saveReservationBtn<%= element.id %>">
+                                            Save Reservation
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <% }) %>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Link to Bootstrap JS (CDN) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+        crossorigin="anonymous"></script>
+
+    <script>
+        // Handling form submission dynamically for each table
+        document.addEventListener('DOMContentLoaded', function () {
+            const buttons = document.querySelectorAll('.btn-primary');
+            buttons.forEach(button => {
+                button.addEventListener('click', function () {
+                    const id = this.getAttribute('data-id');
+                    const saveButton = document.getElementById('saveReservationBtn' + id);
+
+                    saveButton.addEventListener('click', async () => {
+                        const customerName = document.getElementById('customerName' + id).value;
+                        const contactNumber = document.getElementById('contactNumber' + id).value;
+                        const numberOfGuests = document.getElementById('numberOfGuests' + id).value;
+                        const reservationDate = document.getElementById('reservationDate' + id).value;
+                        const tableNumber = document.getElementById('tableNumber' + id).value;
+
+                        // Basic validation
+                        if (!customerName || !contactNumber || !numberOfGuests || !reservationDate || !tableNumber) {
+                            alert('All fields are required!');
+                            return;
+                        }
+
+                        // Prepare reservation data to send to the server
+                        const reservationData = {
+                            customerName,
+                            contactNumber,
+                            numberOfGuests,
+                            reservationDate,
+                            tableNumber,
+                            isReserved: 1,
+                        };
+
+                        try {
+                            const response = await fetch(`/reservation/${id}`, {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json'
+                                },
+                                body: JSON.stringify(reservationData)
+                            });
+
+                            const data = await response.json();
+
+                            if (data.success) {
+                                window.location.reload();
+                            } else {
+                                alert('Error saving reservation!');
+                            }
+                        } catch (error) {
+                            console.error('Error:', error);
+                            alert('An error occurred while saving the reservation.');
+                        }
+                    });
+                });
+            });
+        });
+    </script>
+</body>
+
+</html>
